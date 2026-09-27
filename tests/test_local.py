@@ -8,7 +8,7 @@ def test_detects_secret_and_redacts():
     )
 
     assert result.allowed is True
-    assert result.redacted_text == "token = [REDACTED]"
+    assert result.redacted_text == "[REDACTED]"
     assert any(finding.check_id == "secrets" for finding in result.triggered)
 
 
@@ -23,7 +23,9 @@ def test_local_prompt_injection_blocks_without_backend():
 
 def test_token_limit_can_block():
     policy = Policy.default().with_max_approx_tokens(1)
-    result = Guard(policy=policy, backend=FakeDecisionBackend()).scan("this is definitely longer than one token")
+    result = Guard(policy=policy, backend=FakeDecisionBackend()).scan(
+        "this is definitely longer than one token"
+    )
 
     assert result.allowed is False
     assert any(finding.check_id == "token_limit" for finding in result.triggered)
